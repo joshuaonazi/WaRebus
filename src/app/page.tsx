@@ -1,4 +1,5 @@
 // src/app/page.tsx
+import Link from "next/link";
 import { Zap, Users, Trophy, ArrowRight, Coins } from "lucide-react";
 
 export default function HomePage() {
@@ -32,18 +33,18 @@ export default function HomePage() {
 
         {/* CTAs */}
         <div className="flex flex-wrap gap-4 justify-center">
-          <button className="btn-neon-cyan">
+          <Link href="/daily" className="btn-neon-cyan">
             <span className="flex items-center gap-2">
               Play Daily Clue
               <ArrowRight size={14} />
             </span>
-          </button>
-          <button className="btn-ghost-cyan">
+          </Link>
+          <Link href="/arena" className="btn-ghost-cyan">
             <span className="flex items-center gap-2">
               <Users size={14} />
               Enter Arena
             </span>
-          </button>
+          </Link>
         </div>
       </section>
 

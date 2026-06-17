@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from "next";
 import { Orbitron, Inter, JetBrains_Mono } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -35,7 +36,6 @@ export const metadata: Metadata = {
   keywords: ["crypto", "rebus", "puzzle", "web3", "daily", "multiplayer"],
 };
 
-// themeColor and colorScheme must live here in Next.js 15+
 export const viewport: Viewport = {
   themeColor: "#060B19",
   colorScheme: "dark",
@@ -52,13 +52,16 @@ export default function RootLayout({
       <body className="antialiased">
         <div className="fixed inset-0 bg-grid-overlay pointer-events-none z-0" aria-hidden="true" />
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute top-0 left-0 right-0 h-px bg-cyan-neon/10 animate-scan-line" />
+          <div className="absolute top-0 left-0 right-0 h-px animate-scan-line"
+               style={{ background: "rgba(0,229,255,0.1)" }} />
         </div>
         <div className="relative z-10 flex flex-col min-h-dvh">
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-1">
+              {children}
+            </main>
+          </AuthProvider>
         </div>
       </body>
     </html>

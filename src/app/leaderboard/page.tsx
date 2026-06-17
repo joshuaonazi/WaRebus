@@ -1,16 +1,18 @@
 // src/app/leaderboard/page.tsx
-import { Trophy, TrendingUp, Zap } from "lucide-react";
+"use client";
 
-const MOCK_LEADERS = [
-  { rank: 1,  handle: "0xSatoshi",    war: "142,800", streak: 21, delta: "+2" },
-  { rank: 2,  handle: "CipherWitch",  war: "98,440",  streak: 14, delta: "+1" },
-  { rank: 3,  handle: "RebusKing",    war: "87,200",  streak: 9,  delta: "—"  },
-  { rank: 4,  handle: "DgenPrince",   war: "61,500",  streak: 7,  delta: "-1" },
-  { rank: 5,  handle: "NakamotoJr",   war: "54,900",  streak: 5,  delta: "+3" },
-  { rank: 6,  handle: "GlitchNode",   war: "43,200",  streak: 3,  delta: "—"  },
-  { rank: 7,  handle: "VoidTrader",   war: "38,750",  streak: 2,  delta: "-2" },
-  { rank: 8,  handle: "MemPoolMage",  war: "29,100",  streak: 1,  delta: "—"  },
-] as const;
+import { useEffect, useState } from "react";
+import { Trophy, TrendingUp, Zap, Loader2 } from "lucide-react";
+import { fetchLeaderboard } from "@/lib/war";
+
+type LeaderEntry = {
+  id: string;
+  handle: string;
+  avatar_emoji: string;
+  war_balance: number;
+  streak: number;
+  total_solved: number;
+};
 
 const RANK_COLORS: Record<number, string> = {
   1: "var(--color-war-gold)",
@@ -19,10 +21,19 @@ const RANK_COLORS: Record<number, string> = {
 };
 
 export default function LeaderboardPage() {
+  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLeaderboard(20).then((data) => {
+      setLeaders(data as LeaderEntry[]);
+      setLoading(false);
+    });
+  }, []);
+
   return (
     <div className="page-container">
 
-      {/* ── Header ── */}
       <section className="page-header">
         <div className="page-eyebrow">
           <Trophy size={12} />
@@ -38,65 +49,66 @@ export default function LeaderboardPage() {
 
       <div className="divider-cyber" style={{ maxWidth: "480px", margin: "0 auto" }} />
 
-      {/* ── Table ── */}
       <section className="lb-section">
         <div className="glass-card lb-table-wrap">
 
-          {/* Table header */}
           <div className="lb-row lb-row--header">
             <span className="lb-col-rank">#</span>
             <span className="lb-col-player">Player</span>
             <span className="lb-col-streak">
               <Zap size={11} /> Streak
             </span>
-            <span className="lb-col-delta">24h</span>
+            <span className="lb-col-delta">
+              <TrendingUp size={11} /> Solved
+            </span>
             <span className="lb-col-war">$WAR</span>
           </div>
 
           <div className="divider-cyber" />
 
-          {/* Rows */}
-          {MOCK_LEADERS.map((entry) => (
-            <div
-              key={entry.rank}
-              className={`lb-row lb-row--entry ${entry.rank <= 3 ? "lb-row--podium" : ""}`}
-            >
-              <span
-                className="lb-col-rank lb-rank-num"
-                style={{ color: RANK_COLORS[entry.rank] ?? "rgba(255,255,255,0.3)" }}
-              >
-                {entry.rank <= 3
-                  ? ["🥇","🥈","🥉"][entry.rank - 1]
-                  : entry.rank}
-              </span>
-
-              <span className="lb-col-player lb-handle">
-                {entry.handle}
-              </span>
-
-              <span className="lb-col-streak lb-streak">
-                <Zap size={11} style={{ color: "var(--color-cyan-neon)" }} />
-                {entry.streak}d
-              </span>
-
-              <span
-                className="lb-col-delta lb-delta"
-                style={{
-                  color: entry.delta.startsWith("+")
-                    ? "var(--color-cyan-neon)"
-                    : entry.delta.startsWith("-")
-                    ? "var(--color-magenta-neon)"
-                    : "rgba(255,255,255,0.25)",
-                }}
-              >
-                {entry.delta}
-              </span>
-
-              <span className="lb-col-war lb-war-amount">
-                {entry.war}
-              </span>
+          {loading ? (
+            <div className="lb-loading">
+              <Loader2 size={20} className="auth-spinner" />
+              <span>Loading rankings…</span>
             </div>
-          ))}
+          ) : leaders.length === 0 ? (
+            <div className="lb-loading">
+              <p style={{ color: "rgba(255,255,255,0.3)", fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
+                No players yet. Be the first to solve a puzzle!
+              </p>
+            </div>
+          ) : (
+            leaders.map((entry, i) => (
+              <div
+                key={entry.id}
+                className={`lb-row lb-row--entry ${i < 3 ? "lb-row--podium" : ""}`}
+              >
+                <span
+                  className="lb-col-rank lb-rank-num"
+                  style={{ color: RANK_COLORS[i + 1] ?? "rgba(255,255,255,0.3)" }}
+                >
+                  {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                </span>
+
+                <span className="lb-col-player lb-handle">
+                  {entry.avatar_emoji} {entry.handle}
+                </span>
+
+                <span className="lb-col-streak lb-streak">
+                  <Zap size={11} style={{ color: "var(--color-cyan-neon)" }} />
+                  {entry.streak}d
+                </span>
+
+                <span className="lb-col-delta" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-mono)", fontSize: "0.75rem", textAlign: "center" }}>
+                  {entry.total_solved}
+                </span>
+
+                <span className="lb-war-amount">
+                  {entry.war_balance.toLocaleString()}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
