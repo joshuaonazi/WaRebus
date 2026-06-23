@@ -8,7 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { createRoom } from "@/lib/liveRoom";
 import CreateRoomModal from "@/components/arena/CreateRoomModal";
-import type { QuestionDraft, LiveRoom } from "@/types/liveRoom";
+import type { QuestionDraft } from "@/types/liveRoom";
+import type { LiveRoom } from "@/types/liveRoom";
 
 export default function ArenaPage() {
   const router = useRouter();
@@ -18,8 +19,9 @@ export default function ArenaPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
 
+  // Fetch open rooms
   useEffect(() => {
-    if (!isSupabaseConfigured) { setLoadingRooms(false); return; }
+    if (!isSupabaseConfigured) return;
 
     async function fetchRooms() {
       const { data } = await supabase
@@ -34,6 +36,7 @@ export default function ArenaPage() {
 
     fetchRooms();
 
+    // Realtime: update list when rooms change
     const sub = supabase
       .channel("arena-lobby")
       .on(
@@ -91,6 +94,7 @@ export default function ArenaPage() {
 
       <div className="divider-cyber" style={{ maxWidth: "480px", margin: "0 auto" }} />
 
+      {/* Action buttons */}
       <div style={{ display: "flex", gap: "0.75rem", width: "100%", maxWidth: "680px" }}>
         <button
           className="btn-neon-magenta"
@@ -120,6 +124,7 @@ export default function ArenaPage() {
         </p>
       )}
 
+      {/* Room list */}
       <section className="arena-rooms-section" style={{ width: "100%", maxWidth: "680px" }}>
         <div className="arena-rooms-header">
           <h2 className="arena-rooms-title">Open Rooms</h2>
@@ -155,7 +160,8 @@ export default function ArenaPage() {
                       <p className="arena-room-name">{room.name}</p>
                       <p className="arena-room-meta">
                         <Zap size={11} />
-                        {room.total_rounds} rounds · {statusLabel[room.status] ?? room.status}
+                        {room.total_rounds} rounds ·{" "}
+                        {statusLabel[room.status] ?? room.status}
                       </p>
                     </div>
                   </div>
@@ -166,12 +172,14 @@ export default function ArenaPage() {
                         $WAR
                       </span>
                     </span>
-                    <span style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "0.6rem",
-                      color: statusColor[room.status] ?? "rgba(255,255,255,0.2)",
-                      letterSpacing: "0.1em",
-                    }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "0.6rem",
+                        color: statusColor[room.status] ?? "rgba(255,255,255,0.2)",
+                        letterSpacing: "0.1em",
+                      }}
+                    >
                       {statusLabel[room.status]}
                     </span>
                   </div>

@@ -58,7 +58,7 @@ export const MOCK_ROOM: ArenaRoom = {
   potTotal: 400,
   currentRound: 0,
   totalRounds: 5,
-  createdAt: Date.now(),
+  createdAt: 0,
 };
 
 export const MOCK_QUESTIONS: LiveQuestion[] = SEED_PUZZLES.map((p, i) => ({

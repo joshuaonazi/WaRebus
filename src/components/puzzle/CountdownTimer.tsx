@@ -19,9 +19,11 @@ function formatTime(seconds: number): string {
 }
 
 export default function CountdownTimer() {
-  const [seconds, setSeconds] = useState(getSecondsUntilMidnightUTC());
+  const [seconds, setSeconds] = useState<number | null>(null);
 
+  // Only start on client — avoids SSR/client mismatch
   useEffect(() => {
+    setSeconds(getSecondsUntilMidnightUTC());
     const interval = setInterval(() => {
       setSeconds(getSecondsUntilMidnightUTC());
     }, 1000);
@@ -32,8 +34,9 @@ export default function CountdownTimer() {
     <div className="daily-meta-chip">
       <Clock size={13} />
       <span>
-        Resets in <strong style={{ fontFamily: "var(--font-mono)", color: "white" }}>
-          {formatTime(seconds)}
+        Resets in{" "}
+        <strong style={{ fontFamily: "var(--font-mono)", color: "white" }}>
+          {seconds === null ? "--:--:--" : formatTime(seconds)}
         </strong>
       </span>
     </div>
